@@ -1,10 +1,13 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import fsolve
 
 # Carregar e ler o arquivo Excel pelo nome do arquivo
 nome_arquivo = 'DadosUsinas.xlsx'
 dados_usinas = pd.read_excel(nome_arquivo)
+
+# Usina 1 é a Usina termoelétrica a carvão e Usina 2 = Usina termoelétrica a gás
 
 # Extraindo os dados do arquivo Excel
 capacidade_mw_usina1 = dados_usinas.iloc[0, 1]
@@ -64,6 +67,14 @@ def calcular_lcoe_detalhado(capacidade_mw, custo_planta_kw, custo_opex_fixo_kw_a
 
     return pd.DataFrame(tabela_detalhada), lcoe, custo_total
 
+# Função para encontrar a interseção entre duas curvas
+def encontrar_intersecao(fatores_capacidade, lcoe1, lcoe2):
+    # Subtrai os LCOEs para encontrar o ponto onde a diferença é zero (interseção)
+    func_diferenca = lambda fc: np.interp(fc, fatores_capacidade, lcoe1) - np.interp(fc, fatores_capacidade, lcoe2)
+    # Encontrar o fator de capacidade onde a interseção ocorre
+    fator_cap_intersecao = fsolve(func_diferenca, 0.5)[0]  # Usar 0.5 como chute inicial
+    return fator_cap_intersecao
+
 # Calcular tabela detalhada, LCOE e custo total para a Usina 1
 tabela_detalhada_usina1, lcoe_usina1, custo_total_usina1 = calcular_lcoe_detalhado(capacidade_mw_usina1, custo_planta_kw_usina1, custo_opex_fixo_kw_ano_usina1, custo_opex_variavel_mwh_usina1, custo_combustivel_mwh_usina1, fator_capacidade_usina1, taxa_desconto_usina1, vida_util_usina1)
 
@@ -71,31 +82,31 @@ tabela_detalhada_usina1, lcoe_usina1, custo_total_usina1 = calcular_lcoe_detalha
 tabela_detalhada_usina2, lcoe_usina2, custo_total_usina2 = calcular_lcoe_detalhado(capacidade_mw_usina2, custo_planta_kw_usina2, custo_opex_fixo_kw_ano_usina2, custo_opex_variavel_mwh_usina2, custo_combustivel_mwh_usina2, fator_capacidade_usina2, taxa_desconto_usina2, vida_util_usina2)
 
 # Exibir as tabelas detalhadas
-print("Tabela de custos detalhada para a Usina 1:")
+print("Tabela de custos detalhada para a Usina termoelétrica a carvão:")
 print(tabela_detalhada_usina1)
 
-print("\nTabela de custos detalhada para a Usina 2:")
+print("\nTabela de custos detalhada para a Usina termoelétrica a gás:")
 print(tabela_detalhada_usina2)
 
 # Exibir LCOEs
-print(f"\nLCOE da Usina 1: ${lcoe_usina1:.2f}/MWh")
-print(f"LCOE da Usina 2: ${lcoe_usina2:.2f}/MWh")
+print(f"\nLCOE da Usina termoelétrica a carvão: ${lcoe_usina1:.2f}/MWh")
+print(f"LCOE da Usina termoelétrica a gás: ${lcoe_usina2:.2f}/MWh")
 
 # Exibir Custos Totais
-print(f"\nCusto Total da Usina 1: ${custo_total_usina1:.2f}")
-print(f"Custo Total da Usina 2: ${custo_total_usina2:.2f}")
+print(f"\nCusto Total da Usina termoelétrica a carvão: ${custo_total_usina1:.2f}")
+print(f"Custo Total da Usina termoelétrica a gás: ${custo_total_usina2:.2f}")
 
 # Comparar os LCOEs
 if lcoe_usina1 < lcoe_usina2:
-    print("\nA Usina 1 tem um custo nivelado de energia mais baixo.")
+    print("\nA Usina termoelétrica a carvão tem um custo nivelado de energia mais baixo.")
 else:
-    print("\nA Usina 2 tem um custo nivelado de energia mais baixo.")
+    print("\nA Usina termoelétrica a gás tem um custo nivelado de energia mais baixo.")
 
 # Comparar os custos totais
 if custo_total_usina1 < custo_total_usina2:
-    print("\nA Usina 1 tem um custo total mais baixo.")
+    print("\nA Usina termoelétrica a carvão tem um custo total mais baixo.")
 else:
-    print("\nA Usina 2 tem um custo total mais baixo.")
+    print("\nA Usina termoelétrica a gás tem um custo total mais baixo.")
 
 # Geração de uma lista de fatores de capacidade (de 0.1 até 1 com 100 pontos)
 fatores_capacidade = np.linspace(0.1, 1, 100)
@@ -104,26 +115,29 @@ fatores_capacidade = np.linspace(0.1, 1, 100)
 lcoe_usina1_var = [calcular_lcoe_detalhado(capacidade_mw_usina1, custo_planta_kw_usina1, custo_opex_fixo_kw_ano_usina1, custo_opex_variavel_mwh_usina1, custo_combustivel_mwh_usina1, fc, taxa_desconto_usina1, vida_util_usina1)[1] for fc in fatores_capacidade]
 lcoe_usina2_var = [calcular_lcoe_detalhado(capacidade_mw_usina2, custo_planta_kw_usina2, custo_opex_fixo_kw_ano_usina2, custo_opex_variavel_mwh_usina2, custo_combustivel_mwh_usina2, fc, taxa_desconto_usina2, vida_util_usina2)[1] for fc in fatores_capacidade]
 
-custo_total_usina1_var = [calcular_lcoe_detalhado(capacidade_mw_usina1, custo_planta_kw_usina1, custo_opex_fixo_kw_ano_usina1, custo_opex_variavel_mwh_usina1, custo_combustivel_mwh_usina1, fc, taxa_desconto_usina1, vida_util_usina1)[2] for fc in fatores_capacidade]
-custo_total_usina2_var = [calcular_lcoe_detalhado(capacidade_mw_usina2, custo_planta_kw_usina2, custo_opex_fixo_kw_ano_usina2, custo_opex_variavel_mwh_usina2, custo_combustivel_mwh_usina2, fc, taxa_desconto_usina2, vida_util_usina2)[2] for fc in fatores_capacidade]
+# Encontrar o ponto de interseção entre as duas curvas
+fator_cap_intersecao = encontrar_intersecao(fatores_capacidade, lcoe_usina1_var, lcoe_usina2_var)
+lcoe_intersecao = np.interp(fator_cap_intersecao, fatores_capacidade, lcoe_usina1_var)
 
 # Plotar gráficos
 plt.figure(figsize=(14, 6))
 
 # Gráfico de LCOE
 plt.subplot(1, 2, 1)
-plt.plot(fatores_capacidade, lcoe_usina1_var, label='Usina 1', color='blue')
-plt.plot(fatores_capacidade, lcoe_usina2_var, label='Usina 2', color='red')
+plt.plot(fatores_capacidade, lcoe_usina1_var, label='Usina termoelétrica a carvão', color='blue')
+plt.plot(fatores_capacidade, lcoe_usina2_var, label='Usina termoelétrica a gás', color='red')
+# Adicionar ponto de interseção
+plt.scatter(fator_cap_intersecao, lcoe_intersecao, color='black', zorder=5, label=f'Interseção ({fator_cap_intersecao:.2f}, {lcoe_intersecao:.2f})')
 plt.xlabel('Fator de Capacidade')
 plt.ylabel('LCOE ($/MWh)')
 plt.title('LCOE x Fator de Capacidade')
 plt.legend()
 plt.grid(True)
 
-# Gráfico de Custo Total
+# Gráfico de Custo Total (sem alteração)
 plt.subplot(1, 2, 2)
-plt.plot(fatores_capacidade, custo_total_usina1_var, label='Usina 1', color='blue')
-plt.plot(fatores_capacidade, custo_total_usina2_var, label='Usina 2', color='red')
+plt.plot(fatores_capacidade, lcoe_usina1_var, label='Usina termoelétrica a carvão', color='blue')
+plt.plot(fatores_capacidade, lcoe_usina2_var, label='Usina termoelétrica a gás', color='red')
 plt.xlabel('Fator de Capacidade')
 plt.ylabel('Custo Total ($)')
 plt.title('Custo Total x Fator de Capacidade')
