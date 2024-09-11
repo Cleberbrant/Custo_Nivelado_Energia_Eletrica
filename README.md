@@ -21,7 +21,7 @@ Este trabalho tem o objetivo de apresentar o desenvolvimento de uma aplicação 
 Para rodar o programa, é necessário configurar seu ambiente fazendo uma instalação prévia do Python 3. Recomenda-se a utilização do Visual Studio Code, e duas extensões dentro do mesmo, o Jupyter e o Python, que também precisam de instalação prévia. Após isso, é necessário instalar as bibliotecas em algum terminal de seu computador.
 
 ## Resultados
-### Lcoe x Fator Capacidade
+### LCOE x Fator Capacidade
 ![Lcoe x Fator Capacidade](./lcoexFatorCapacidade.jpeg)
 
 ### Custo Total x Fator Capacidade
