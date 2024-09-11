@@ -26,3 +26,6 @@ Para rodar o programa, é necessário configurar seu ambiente fazendo uma instal
 
 ### Custo Total x Fator Capacidade
 ![Custo Total x Fator Capacidade](./CustoTotalxFatorCapacidade.jpeg)
+
+### Resultados
+![Resultados](./resultados.jpeg)
